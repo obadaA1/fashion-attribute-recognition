@@ -1,0 +1,127 @@
+{
+  "dataset": "TextileNet-fabric",
+  "source_archive": "fabric.tar.gz",
+  "source_size_gb": 12.1,
+  "original_class_count": 27,
+  "final_class_count": 21,
+  "classes_dropped": {
+    "schema_orphans": {
+      "classes": [
+        "tweed",
+        "crepe",
+        "chenille",
+        "serge"
+      ],
+      "reason": "Weave/yarn-style labels that do not map cleanly to the 6-material schema (cotton / silk-satin / leather / synthetic / denim / knitwear).",
+      "images_train": 3579,
+      "images_test": 865
+    },
+    "tiny_classes": {
+      "classes": [
+        "canvas",
+        "twill"
+      ],
+      "reason": "n<50 training images, insufficient for stratified train/val/test partitioning and reliable per-class F1.",
+      "images_train": 43,
+      "images_test": 9
+    }
+  },
+  "final_classes": [
+    "chambray",
+    "chiffon",
+    "corduroy",
+    "denim",
+    "faux_fur",
+    "faux_leather",
+    "flannel",
+    "fleece",
+    "gingham",
+    "jersey",
+    "knit",
+    "lace",
+    "lawn",
+    "neoprene",
+    "organza",
+    "plush",
+    "satin",
+    "taffeta",
+    "tulle",
+    "velvet",
+    "vinyl"
+  ],
+  "totals_after_drop": {
+    "train_images": 96094,
+    "test_images": 23755
+  },
+  "seed": 42,
+  "created_at_utc": "2026-04-27T13:51:20Z",
+  "git_sha": null,
+  "notes": "Split FIRST, label SECOND. Labels generated via Marqo-FashionSigLIP MVC pipeline post-split.",
+  "sampling": {
+    "cap_train": 500,
+    "cap_test": 200,
+    "seed": 42,
+    "train_sampled_total": 9595,
+    "test_sampled_total": 3760,
+    "train_floor_classes": {
+      "neoprene": 184,
+      "vinyl": 202,
+      "plush": 209
+    },
+    "test_floor_classes": {
+      "vinyl": 46,
+      "plush": 57,
+      "neoprene": 60,
+      "taffeta": 197
+    },
+    "strategy": "Train capped at 500/class; test capped at 200/class for balanced per-class F1 reporting on a 151x-imbalanced dataset. Classes below cap retained at natural count. Fixed random seed (42)."
+  },
+  "split": {
+    "strategy": "Stratified 80/20 split of sampled train. Test held out (native TextileNet test, subsampled).",
+    "val_fraction": 0.2,
+    "seed": 42,
+    "train_final_total": 7676,
+    "val_final_total": 1919,
+    "test_final_total": 3760,
+    "train_per_class_min": 147,
+    "train_per_class_max": 400,
+    "val_per_class_min": 37,
+    "val_per_class_max": 100
+  },
+  "labelling": {
+    "model": "Marqo/marqo-fashionSigLIP",
+    "backbone_params_M": 203.2,
+    "embedding_dim": 768,
+    "ensemble_size": 5,
+    "softmax_temperature": 100,
+    "conf_thresholds": {
+      "color": 0.3,
+      "pattern": 0.4,
+      "texture": 0.4
+    },
+    "material_strategy": "rule_based_from_folder",
+    "cpt_strategy": "zero_shot_siglip_with_abstain",
+    "abstain_rates": {
+      "color": {
+        "train": 0.0033871808233454925,
+        "val": 0.004168837936425221,
+        "test": 0.0045212765957446804
+      },
+      "pattern": {
+        "train": 0.05823345492443981,
+        "val": 0.05158936946326212,
+        "test": 0.06196808510638298
+      },
+      "texture": {
+        "train": 0.07178217821782178,
+        "val": 0.07399687337154769,
+        "test": 0.0726063829787234
+      }
+    },
+    "load_failures": {
+      "train": 0,
+      "val": 0,
+      "test": 0
+    }
+  }
+}

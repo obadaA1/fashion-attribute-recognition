@@ -1,55 +1,38 @@
-# Fashion Attribute Recognition
+# Multi-Head Fashion Attribute Recognition
 
-Multi-attribute classification of fashion images (material, color, pattern, texture) using CLIP-based pseudo-labelling and a multi-head deep learning classifier.
+Self-supervised backbones (DINOv2) + VLM-audited silver labels for joint per-image classification of **color, pattern, material, and texture** on a 13,355-image TextileNet subset.
 
-**Mini Project 2 — Deep Learning course, Spring 2026**
+**Mean test macro-F1: 0.765** (DINOv2 ViT-B/14) vs **0.649** (ResNet-50, identical recipe) — **+11.6 pp** absolute. DINOv2 wins on every head and on all 29 classes.
 
-## 🎯 Project overview
+📄 [IEEE writeup (PDF)](./report.pdf) · 📓 [Notebook](./fashion_attributes.ipynb) · 🔬 [Provenance manifest](./manifest.json)
 
-This project trains a multi-branch classifier that predicts four visual attributes from a single fashion image:
+---
 
-| Attribute | Classes | Count |
-|---|---|---|
-| Material | cotton, silk/satin, leather, synthetic, denim, knitwear | 6 |
-| Color | black, white, red, navy, beige, blue, green, yellow, grey, brown, pink, purple | 12 |
-| Pattern | solid, striped, checkered/plaid, floral, geometric, animal print | 6 |
-| Texture | smooth, rough/coarse, fluffy/furry, ribbed/structured, sheer | 5 |
+## TL;DR
 
-## 🔬 Approach
+Public fashion datasets each cover at most two of {color, pattern, material, texture}; none label all four jointly per image. I built a 13,355-image TextileNet subset and hybrid-labeled it: rule-based mapping for material (perfect-precision by construction), Marqo-FashionSigLIP zero-shot with 5-template prompt ensembling and confidence-threshold abstain for color / pattern / texture. A 210-image stratified human audit anchors silver-label trust at 0.971 / 0.803 / 0.681 macro-F1. A DINOv2 ViT-B/14 backbone with four parallel linear heads reaches mean test macro-F1 0.765 — uniformly +11.6 pp over an identically-recipe-trained ResNet-50. Cramér's V on material×texture (V_gt=0.318, V_pred=0.353, Δ=+0.035) confirms the multi-head design preserves rather than collapses the joint distribution.
 
-1. **Data:** ~5,000 images sampled stratified from the TextileNet fabric dataset (23 folders)
-2. **Pseudo-labelling:** Marqo-FashionSigLIP (fashion-domain-tuned SigLIP) with 5-view multi-view consensus (4/5 agreement required)
-3. **Classifier:** ImageNet-pretrained backbone (ResNet-50 / EfficientNet-B3) with 4 classification heads, fine-tuned end-to-end
-4. **Evaluation:** Per-attribute accuracy, per-class F1, confusion matrices on held-out test set
-5. **Demo:** Streamlit app for single-image inference
+## Method
 
-## 📁 Repository structure
+- **Backbone:** DINOv2 ViT-B/14 (86.6M params, self-supervised on LVD-142M)
+- **Heads:** 4 parallel linear (768 → {6, 12, 6, 5}; 22.3k params)
+- **Loss:** sum of 4 class-weighted CE, abstained labels masked via `ignore_index=-100`
+- **Schedule:** 20 epochs, AdamW, discriminative LRs (1e-5 backbone / 1e-4 heads), 2-epoch warmup + 18-epoch cosine, AMP fp16, batch 64
+- **Hardware:** single NVIDIA T4
 
-├── configs/          # YAML configs (paths, hyperparameters, prompts)
-├── src/              # Python source (importable modules)
-│   ├── data/         # sampling, pseudo-labelling, manifests, datasets
-│   ├── models/       # multi-head classifier architectures
-│   ├── training/     # training loop, losses
-│   ├── evaluation/   # metrics, error analysis
-│   ├── inference/    # prediction code for the demo
-│   └── utils/        # seeds, logging helpers
-├── scripts/          # CLI entrypoints (01_sample, 02_label, 03_train, 04_eval)
-├── notebooks/        # EDA + Colab runners (thin wrappers around src/)
-├── tests/            # pytest unit tests
-└── docs/             # model card, dataset card, design decisions
+## Results
 
-## 🚀 Quick start
+| Head     | n eval | Acc.  | DINOv2 F1 | ResNet-50 F1 | Δ      |
+|----------|-------:|------:|----------:|-------------:|-------:|
+| material |  3,760 | 0.747 |     0.744 |        0.612 | +13.2  |
+| color    |  3,743 | 0.842 |     0.827 |        0.738 |  +8.9  |
+| pattern  |  3,527 | 0.822 |     0.737 |        0.616 | +12.1  |
+| texture  |  3,487 | 0.742 |     0.753 |        0.630 | +12.3  |
+| **mean** |    —   | **0.788** | **0.765** | **0.649** | **+11.6** |
 
-_Coming soon — will be populated as the pipeline is built._
+Same data, splits, augmentation, optimizer, schedule, class weights. Only the backbone changes.
 
-## 📊 Experiment tracking
-
-All training runs logged to [Weights & Biases](https://wandb.ai). Links in the model card once runs are completed.
-
-## 📄 License
-
-MIT — see [LICENSE](LICENSE).
-
-## 👤 Author
-
-Obada Alsohli — [GitHub](https://github.com/obadaA1)
+## Reproduction
+git clone https://github.com/obadaA1/fashion-attribute-recognition
+cd fashion-attribute-recognition
+pip install -r requirements.txt
