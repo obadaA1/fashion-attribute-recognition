@@ -56,3 +56,68 @@ Runtime checkpoints stay outside git and are mounted on the UN1290. See
 `docs/deployment.md` for the expected `/models/fashion/current` layout,
 including the local DINOv2 hub repository used for network-free production
 startup.
+
+## API contract
+
+- `GET /health` - reports service and model-artifact status.
+- `GET /health/live` - process liveness check.
+- `GET /health/ready` - readiness check; returns 503 until artifacts validate and the model is loadable.
+- `GET /model-info` - reports active model metadata without exposing filesystem paths or secrets.
+- `POST /predict` - accepts one JPEG/PNG image up to 10 MB.
+
+Structured errors use one shape:
+
+```json
+{
+  "error": {
+    "code": "request_error",
+    "message": "Uploaded file does not look like a valid JPEG or PNG image.",
+    "request_id": "2f8c8a2a-5c5d-47f1-8f9a-7ec5f4e2d6d9"
+  }
+}
+```
+
+Example request:
+
+```bash
+curl -fsS http://127.0.0.1:8011/health/live
+curl -fsS http://127.0.0.1:8011/model-info
+curl -fsS -X POST http://127.0.0.1:8011/predict \
+  -F "file=@sample-garment.jpg;type=image/jpeg"
+```
+
+Example response:
+
+```json
+{
+  "model_version": "v1",
+  "predictions": {
+    "color": {"label": "navy", "confidence": 0.91, "top_k": []},
+    "pattern": {"label": "solid", "confidence": 0.88, "top_k": []},
+    "material": {"label": "cotton", "confidence": 0.73, "top_k": []},
+    "texture": {"label": "smooth", "confidence": 0.69, "top_k": []}
+  }
+}
+```
+
+## Operations
+
+CI/CD is defined in `.github/workflows/ci.yml`:
+
+- Ruff linting.
+- Mypy type checking.
+- Pytest with coverage threshold.
+- Dependency audit with `pip-audit`.
+- Secret scanning with Gitleaks.
+- Docker build on PR/push.
+- GHCR publish and Trivy image scan on `main`/version tags.
+
+Tests live in `tests/` and cover health/readiness behavior, artifact validation, upload validation, structured error responses, and mocked prediction contracts.
+
+Docker Compose is available in `docker-compose.example.yml`. It binds only to `127.0.0.1`, runs as a non-root user, drops Linux capabilities, uses a read-only root filesystem, and mounts model artifacts read-only.
+
+CORS is configured through `FASHION_CORS_ORIGINS` and should be restricted in production to:
+
+```text
+https://obadaalsehli.com
+```
