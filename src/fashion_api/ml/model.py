@@ -48,7 +48,7 @@ def build_model(device: str = "cpu", backbone_repo: str = "facebookresearch/dino
     class FashionMultiHeadModel(nn.Module):
         def __init__(self) -> None:
             super().__init__()
-            self.backbone = torch.hub.load(backbone_repo, "dinov2_vitb14", source=backbone_source)
+            self.backbone = torch.hub.load(backbone_repo, "dinov2_vitb14", source=backbone_source, pretrained=False)
             self.heads = nn.ModuleDict(
                 {attr: nn.Linear(EMBED_DIM, len(labels)) for attr, labels in LABEL_MAPS.items()}
             )
