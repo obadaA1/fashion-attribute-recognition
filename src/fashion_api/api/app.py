@@ -1,11 +1,12 @@
-from __future__ import annotations
-
 import logging
 from contextlib import asynccontextmanager
 from functools import lru_cache
 
-from fastapi import FastAPI, HTTPException, UploadFile, status
+from fastapi import FastAPI, HTTPException, Request, UploadFile, status
 from fastapi.middleware.cors import CORSMiddleware
+from slowapi import Limiter, _rate_limit_exceeded_handler
+from slowapi.errors import RateLimitExceeded
+from slowapi.util import get_remote_address
 
 from fashion_api.api.errors import http_exception_handler, unhandled_exception_handler
 from fashion_api.api.middleware import request_id_middleware
@@ -111,6 +112,10 @@ def create_app() -> FastAPI:
         redoc_url=None,
         lifespan=lifespan,
     )
+    limiter = Limiter(key_func=get_remote_address, default_limits=[])
+    app.state.limiter = limiter
+    app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
+
     app.middleware("http")(request_id_middleware)
     app.add_exception_handler(HTTPException, http_exception_handler)
     app.add_exception_handler(Exception, unhandled_exception_handler)
@@ -151,7 +156,8 @@ def create_app() -> FastAPI:
         return get_model_service().info()
 
     @app.post("/predict", response_model=FashionPredictionResponse)
-    async def predict(file: UploadFile) -> FashionPredictionResponse:
+    @limiter.limit("10/minute")
+    async def predict(request: Request, file: UploadFile) -> FashionPredictionResponse:
         image_bytes = await read_valid_image(file, settings.max_image_bytes)
         service = get_model_service()
         if not service.ready:
