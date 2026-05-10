@@ -1,0 +1,130 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[codz]
+*$py.class
+data/raw/
+checkpoints/
+*.pyc
+ipynb_checkpoints/
+# C extensions
+*.so
+
+# Distribution / packaging
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Runtime model artifacts - mounted on UN1290, not committed
+/models/
+/checkpoints/
+*.pt
+*.pth
+*.ckpt
+*.onnx
+*.safetensors
+*.bin
+*.h5
+*.joblib
+*.pkl
+
+# Local sample/raw data
+/data/
+data/raw/
+data/samples/
+*.jpg
+*.jpeg
+*.png
+*.webp
+*.mp4
+*.mov
+*.avi
+*.mkv
+
+# Research export artifacts should be stored in Git LFS, releases, or external storage.
+research/**/*.pdf
+research/**/*.png
+
+# PyInstaller
+*.manifest
+*.spec
+
+# Installer logs
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Unit test / coverage reports
+htmlcov/
+.tox/
+.nox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.py.cover
+.hypothesis/
+.pytest_cache/
+cover/
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# Environments
+.env
+.env.*
+!.env.example
+.envrc
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# Tool caches
+.mypy_cache/
+.dmypy.json
+dmypy.json
+.pyre/
+.pytype/
+.ruff_cache/
+.pdm-python
+.pdm-build/
+.pixi
+__pypackages__/
+
+# IDE/editor
+.spyderproject
+.spyproject
+.ropeproject
+.cursorignore
+.cursorindexingignore
+
+# Sphinx/mkdocs
+/site
+docs/_build/
+
+# Logs/database
+*.log
+logs/
+db.sqlite3
+db.sqlite3-journal
+
+# Cython debug symbols
+cython_debug/

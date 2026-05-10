@@ -1,0 +1,5 @@
+attribute,n_eval,accuracy,macro_f1,weighted_f1
+material,3760,74.68,0.744,0.747
+color,3743,84.24,0.827,0.842
+pattern,3527,82.17,0.737,0.821
+texture,3487,74.22,0.753,0.742

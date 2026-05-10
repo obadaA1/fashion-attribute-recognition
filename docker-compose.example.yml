@@ -1,0 +1,24 @@
+services:
+  fashion-api:
+    build: .
+    restart: unless-stopped
+    read_only: true
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    tmpfs:
+      - /tmp:size=128m,noexec,nosuid,nodev
+    ports:
+      - "127.0.0.1:8011:8000"
+    environment:
+      FASHION_MODEL_ROOT: /models/fashion/current
+      FASHION_CORS_ORIGINS: https://obadaalsehli.com,http://localhost:3000
+    volumes:
+      - /models/fashion:/models/fashion:ro
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health/ready', timeout=3)"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s

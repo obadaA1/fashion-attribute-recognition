@@ -1,0 +1,4 @@
+,n_eval,n_excl,accuracy,macro_f1,weighted_f1
+color,210.0,0.0,97.1,0.971,0.972
+pattern,209.0,1.0,90.9,0.803,0.94
+texture,210.0,0.0,77.6,0.681,0.803
